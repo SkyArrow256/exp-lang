@@ -113,6 +113,7 @@ fn parse_expr(pair: Pair<Rule>) -> Expr {
                 Rule::multiply => BinaryOperator::Multiply,
                 Rule::divide => BinaryOperator::Divide,
                 Rule::modulo => BinaryOperator::Modulo,
+                Rule::range => BinaryOperator::Range,
                 Rule::equal => BinaryOperator::Equal,
                 Rule::assign => BinaryOperator::Assign,
                 _ => unreachable!(),
@@ -158,8 +159,9 @@ struct ExpLang;
 static PRATT_PARSER: LazyLock<PrattParser<Rule>> = LazyLock::new(|| {
     use pest::pratt_parser::{Assoc, Op};
     PrattParser::new()
-        .op(Op::infix(Rule::assign, Assoc::Right))
+        .op(Op::infix(Rule::assign, Assoc::Right)) 
         .op(Op::infix(Rule::equal, Assoc::Left))
+        .op(Op::infix(Rule::range, Assoc::Left))  
         .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::subtract, Assoc::Left))
         .op(Op::infix(Rule::multiply, Assoc::Left)
             | Op::infix(Rule::divide, Assoc::Left)

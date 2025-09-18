@@ -1,6 +1,6 @@
 f main(): {
-    let fact: 1;
-    for i in [1, 2, 3, 4]: {
-        fact <<- fact * i;
-    };
-} => fact;
+	let sum: 0;
+	for i in 1..6: {
+		sum <<- sum + i;
+	};
+} => sum;

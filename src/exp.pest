@@ -24,7 +24,7 @@ True   =  { "true" }
 False  =  { "false" }
 none   =  { "None" }
 
-binary_operator = _{ add | subtract | multiply | divide | modulo | assign | equal }
+binary_operator = _{ add | subtract | multiply | divide | modulo | assign | equal | range}
 add             =  { "+" }
 subtract        =  { "-" }
 multiply        =  { "*" }
@@ -32,6 +32,7 @@ divide          =  { "/" }
 modulo          =  { "%" }
 assign          =  { "<<-" }
 equal           =  { "=" }
+range = {".."}
 
 prefix_operator = _{ minus }
 minus           =  { "-" }

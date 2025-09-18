@@ -50,6 +50,7 @@ pub enum BinaryOperator {
     Multiply,
     Divide,
     Modulo,
+    Range,
     Assign,
     Equal,
 }
