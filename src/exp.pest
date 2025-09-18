@@ -1,0 +1,43 @@
+file       = _{ SOI ~ statements ~ EOI }
+statements =  { statement* }
+statement  =  { (func_def | Let | For | expr) ~ ";" }
+func_def   =  { "f" ~ ident ~ "(" ~ args ~ ")" ~ ":" ~ expr }
+Let        =  { "let" ~ ident ~ ":" ~ expr }
+For        =  { "for" ~ ident ~ "in" ~ expr ~ ":" ~ expr }
+
+args = { ident? ~ ("," ~ ident)* }
+
+expr    =  { If | (term ~ (binary_operator ~ term)*) }
+term    = _{ prefix_operator* ~ factor ~ postfix_operator* }
+factor  = _{ literal | ("(" ~ expr ~ ")") }
+literal = _{ none | number | bool | string | ident | block | array }
+block   =  { "{" ~ statements ~ "}" ~ ("=>" ~ expr)? }
+array   =  { "[" ~ expr? ~ ("," ~ expr)* ~ "]" }
+If      =  { "if" ~ expr ~ "->" ~ expr ~ ("else" ~ "->" ~ expr)? }
+
+ident  = @{ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+number = @{ ASCII_DIGIT+ }
+chars  = @{ (!("\"") ~ ANY)* }
+bool   =  { True | False }
+string = ${ "\"" ~ chars ~ "\"" }
+True   =  { "true" }
+False  =  { "false" }
+none   =  { "None" }
+
+binary_operator = _{ add | subtract | multiply | divide | modulo | assign | equal }
+add             =  { "+" }
+subtract        =  { "-" }
+multiply        =  { "*" }
+divide          =  { "/" }
+modulo          =  { "%" }
+assign          =  { "<<-" }
+equal           =  { "=" }
+
+prefix_operator = _{ minus }
+minus           =  { "-" }
+
+postfix_operator = _{ call | index }
+call             =  { "(" ~ expr? ~ ("," ~ expr)* ~ ")" }
+index            =  { "[" ~ expr ~ "]" }
+
+WHITESPACE = _{ WHITE_SPACE }

@@ -1,0 +1,9 @@
+[package]
+name = "exp-lang"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+pest = "2.8"
+pest_derive = "2.8"
+rustc-hash = "2.1.1"
