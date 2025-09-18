@@ -1,6 +1,12 @@
 f main(): {
-	let sum: 0;
-	for i in 1..6: {
-		sum <<- sum + i;
+	let test: 0;
+	call();
+} => test;
+
+f call(): {
+	let test: 0;
+	test <<- 10;
+	{
+		test <<- 3;
 	};
-} => sum;
+};

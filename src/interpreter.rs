@@ -1,7 +1,6 @@
-use rustc_hash::FxHashMap;
-
 use crate::ast::*;
-use std::mem;
+use scope::Scope;
+mod scope;
 
 pub fn eval(program: Program) -> Primitive {
     let mut global_scope = Scope::new();
@@ -22,14 +21,14 @@ fn eval_statement(statement: &Statement, scope: &mut Scope) {
         }
         Statement::Let { ident, value } => {
             let value = eval_expr(value, scope);
-            scope.add(ident.clone(), value);
+            scope.define(ident.clone(), value);
         }
         Statement::For { ident, iter, expr } => {
             let iter = eval_expr(iter, scope);
             if let Primitive::Array(iter) = iter {
                 for element in iter.into_iter() {
                     scope.create();
-                    scope.add(ident.clone(), element);
+                    scope.define(ident.clone(), element);
                     eval_expr(expr, scope);
                     scope.delete();
                 }
@@ -37,14 +36,14 @@ fn eval_statement(statement: &Statement, scope: &mut Scope) {
                 if let Some(fin) = fin {
                     for i in begin..fin {
                         scope.create();
-                        scope.add(ident.clone(), Primitive::Number(i));
+                        scope.define(ident.clone(), Primitive::Number(i));
                         eval_expr(expr, scope);
                         scope.delete();
                     }
                 } else {
                     for i in begin.. {
                         scope.create();
-                        scope.add(ident.clone(), Primitive::Number(i));
+                        scope.define(ident.clone(), Primitive::Number(i));
                         eval_expr(expr, scope);
                         scope.delete();
                     }
@@ -54,7 +53,7 @@ fn eval_statement(statement: &Statement, scope: &mut Scope) {
             }
         }
         Statement::FuncDef { ident, args, expr } => {
-            scope.add(
+            scope.define(
                 ident.clone(),
                 Primitive::Function {
                     args_name: args.to_owned(),
@@ -122,21 +121,24 @@ fn eval_expr(expr: &Expr, scope: &mut Scope) -> Primitive {
                     }
                 }
                 UnaryOperator::Call(args_value) => {
-                    scope.create();
                     let args = args_value
                         .iter()
                         .map(|expr| eval_expr(expr, scope))
                         .collect::<Vec<Primitive>>();
                     if let Primitive::Function { args_name, code } = operand {
+                        let mut global = scope.create_global();
+                        let inner_scope = global.get_mut();
+                        inner_scope.create();
                         args_name
                             .into_iter()
                             .zip(args.into_iter())
-                            .for_each(|(ident, value)| scope.add(ident, value));
-                        let return_value = eval_expr(&code, scope);
-                        scope.delete();
+                            .for_each(|(ident, value)| inner_scope.define(ident, value));
+                        let return_value = eval_expr(&code, inner_scope);
+                        inner_scope.delete();
+                        global.reconstruct(scope);
                         return_value
                     } else {
-                        panic!("TypeError");
+                        panic!("TypeError: 関数型以外は呼び出せません");
                     }
                 }
                 UnaryOperator::Index(index) => {
@@ -231,55 +233,4 @@ pub enum Primitive {
     Function { args_name: Vec<Ident>, code: Expr },
     Range {begin: i32, fin: Option<i32>},
     None,
-}
-
-#[derive(Debug, Default)]
-struct Scope {
-    table: FxHashMap<Ident, Primitive>,
-    parent: Option<Box<Scope>>,
-}
-
-impl Scope {
-    fn new() -> Self {
-        Self {
-            table: FxHashMap::default(),
-            parent: None,
-        }
-    }
-    fn create(&mut self) {
-        let parent = mem::take(self);
-        *self = Self {
-            table: FxHashMap::default(),
-            parent: Some(Box::new(parent)),
-        };
-    }
-    fn add(&mut self, ident: Ident, value: Primitive) {
-        self.table.insert(ident, value);
-    }
-    fn get(&self, ident: &Ident) -> Option<Primitive> {
-        if let Some(primitive) = self.table.get(ident).cloned() {
-            Some(primitive)
-        } else {
-            self.parent.as_ref()?.get(ident)
-        }
-    }
-    fn get_mut(&mut self, ident: &Ident) -> Option<&mut Primitive> {
-        if let Some(primitive) = self.table.get_mut(ident) {
-            Some(primitive)
-        } else {
-            self.parent.as_mut()?.get_mut(ident)
-        }
-    }
-    fn assign(&mut self, ident: &Ident, value: Primitive) {
-        let var = self.get_mut(ident).unwrap();
-        if mem::discriminant(var) == mem::discriminant(&value) {
-            *var = value;
-        } else {
-            panic!("TypeError: Cannot assign");
-        }
-    }
-    fn delete(&mut self) {
-        let scopes = mem::take(self);
-        *self = *scopes.parent.unwrap();
-    }
 }
