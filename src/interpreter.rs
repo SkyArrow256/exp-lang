@@ -32,7 +32,7 @@ fn eval_statement(statement: &Statement, scope: &mut Scope) {
                     eval_expr(expr, scope);
                     scope.delete();
                 }
-            } else if let Primitive::Range{begin, fin} = iter {
+            } else if let Primitive::Range { begin, fin } = iter {
                 if let Some(fin) = fin {
                     for i in begin..fin {
                         scope.create();
@@ -197,7 +197,10 @@ fn eval_expr(expr: &Expr, scope: &mut Scope) -> Primitive {
                 }
                 BinaryOperator::Range => {
                     if let (Primitive::Number(lhs), Primitive::Number(rhs)) = (lhs, rhs) {
-                        Primitive::Range {begin: lhs, fin: Some(rhs)}
+                        Primitive::Range {
+                            begin: lhs,
+                            fin: Some(rhs),
+                        }
                     } else {
                         panic!("TypeError");
                     }
@@ -231,6 +234,6 @@ pub enum Primitive {
     String(String),
     Array(Vec<Primitive>),
     Function { args_name: Vec<Ident>, code: Expr },
-    Range {begin: i32, fin: Option<i32>},
+    Range { begin: i32, fin: Option<i32> },
     None,
 }
