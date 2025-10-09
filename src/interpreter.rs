@@ -66,6 +66,7 @@ fn eval_statement(statement: &Statement, scope: &mut Scope) {
 
 fn eval_expr(expr: &Expr, scope: &mut Scope) -> Primitive {
     match expr {
+        Expr::Expr(expr) => eval_expr(expr, scope),
         Expr::Literal(literal) => match literal {
             Literal::Number(num) => Primitive::Number(*num),
             Literal::Bool(bool) => Primitive::Bool(*bool),

@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 use crate::ast::*;
 
 pub fn parse(code: &str) -> Result<Program, ::pest::error::Error<Rule>> {
-    match ExpLang::parse(Rule::file, &code) {
+    match dbg!(ExpLang::parse(Rule::file, &code)) {
         Ok(mut pairs) => Ok(parse_program(pairs.next().unwrap())),
         Err(err) => Err(err),
     }
@@ -104,6 +104,7 @@ fn parse_expr(pair: Pair<Rule>) -> Expr {
                     return_value,
                 })
             }
+            Rule::expr => Expr::Expr(Box::new(parse_expr(dbg!(primary)))),
             _ => unreachable!(),
         })
         .map_infix(|lhs, operator, rhs| {

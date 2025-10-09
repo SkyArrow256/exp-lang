@@ -24,6 +24,7 @@ pub enum Statement {
 
 #[derive(Debug, Clone)]
 pub enum Expr {
+    Expr(Box<Expr>),
     Literal(Literal),
     Unary {
         operand: Box<Expr>,

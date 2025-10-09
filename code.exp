@@ -1,12 +1,4 @@
 f main(): {
-	let test: 0;
-	call();
+    let b: 4 + 5;
+	let test: (b + 1) * 9;
 } => test;
-
-f call(): {
-	let test: 0;
-	test <<- 10;
-	{
-		test <<- 3;
-	};
-};
